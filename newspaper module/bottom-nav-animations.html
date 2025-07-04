@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newspaper Module Popup Animations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Main newspaper content area */
+        .newspaper-content {
+            height: 100vh;
+            background: white;
+            padding: 20px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="8" fill="%23ddd">Newspaper Content Area</text></svg>');
+        }
+
+        /* Bottom bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #2c3e50;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 400;
+        }
+
+        .bottom-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .bottom-btn:hover {
+            background: #2980b9;
+        }
+
+        .bottom-btn.active {
+            background: #e74c3c;
+        }
+
+        /* Overlay backdrop */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 200;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Page Selection Popup - Slides from behind bottom nav */
+        .page-popup {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            width: 90%;
+            max-width: 1000px;
+            height: 240px;
+            background: white;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 350;
+            padding: 20px 15px 80px 15px;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .page-popup.active {
+            transform: translateX(-50%) translateY(-60px);
+        }
+
+        .page-carousel {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            position: relative;
+        }
+
+        .carousel-nav {
+            background: #f8f9fa;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: #6c757d;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .carousel-nav:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .page-grid {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 10px 15px;
+            flex: 1;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .page-grid::-webkit-scrollbar {
+            display: none;
+        }
+
+        .page-item {
+            aspect-ratio: 3/4;
+            width: 80px;
+            flex-shrink: 0;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            text-align: center;
+        }
+
+        .page-item .page-label {
+            position: absolute;
+            bottom: -20px;
+            font-size: 9px;
+            color: #6c757d;
+            white-space: nowrap;
+        }
+
+        .page-item:hover {
+            transform: scale(1.05);
+            border-color: #3498db;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        /* Location Dropdown - Slides from behind bottom nav on left */
+        .location-popup {
+            position: fixed;
+            bottom: 0;
+            left: 20px;
+            width: 280px;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(100%);
+            opacity: 1;
+            visibility: visible;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 350;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        .location-popup.active {
+            transform: translateY(-60px);
+        }
+
+        .location-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #ecf0f1;
+            transition: background 0.2s;
+        }
+
+        .location-item:hover {
+            background: #f8f9fa;
+        }
+
+        .location-item.selected {
+            background: #3498db;
+            color: white;
+        }
+
+        /* Calendar Popup - Slides from behind bottom nav on right */
+        .calendar-popup {
+            position: fixed;
+            bottom: 0;
+            right: 20px;
+            transform: translateY(100%);
+            background: white;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.15);
+            opacity: 1;
+            visibility: visible;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 350;
+            padding: 20px 20px 100px 20px;
+            min-width: 320px;
+        }
+
+        .calendar-popup.active {
+            transform: translateY(-60px);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .calendar-day:hover {
+            background: #ecf0f1;
+        }
+
+        .calendar-day.today {
+            background: #3498db;
+            color: white;
+        }
+
+        .popup-title {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 6px 6px 0 0;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: -25px;
+            right: 0;
+            background: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #7f8c8d;
+            padding: 5px 10px;
+            border-radius: 6px 6px 0 0;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Main newspaper content -->
+    <div class="newspaper-content">
+        <h1 style="text-align: center; margin-top: 100px; color: #bdc3c7;">
+            📰 Newspaper Module Demo
+        </h1>
+        <p style="text-align: center; color: #95a5a6; margin-top: 20px;">
+            Click the buttons in the bottom bar to see popup animations
+        </p>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="bottom-bar">
+        <button class="bottom-btn" id="locationBtn">Location</button>
+        <button class="bottom-btn" id="pageBtn">Pages</button>
+        <button class="bottom-btn" id="calendarBtn">Calendar</button>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Page Selection Popup -->
+    <div class="page-popup" id="pagePopup">
+        <div class="popup-title">Select Page</div>
+        <button class="close-btn" onclick="closeAllPopups()">&times;</button>
+        <div class="page-carousel">
+            <button class="carousel-nav" id="prevBtn">‹</button>
+            <div class="page-grid" id="pageGrid">
+                <div class="page-item">
+                    <div>Page</div>
+                    <div class="page-label">01 Front Page</div>
+                </div>
+                <div class="page-item">
+                    <div>Page</div>
+                    <div class="page-label">02 Metrolife</div>
+                </div>
+                <div class="page-item">
+                    <div>Page</div>
+                    <div class="page-label">03 State</div>
+                </div>
+                <div class="page-item">
+                    <div>Page</div>
+                    <div class="page-label">03A Metrolife</div>
+                </div>
+                <div class="page-item">
+                    <div>Page</div>
+                    <div class="page-label">03B State</div>
+                </div>
+                <div class="page-item">
+                    <div>Page</div>
+                    <div class="page-label">04 State</div>
+                </div>
+                <div class="page-item">
+                    <div>Page</div>
+                    <div class="page-label">05 State</div>
+                </div>
+                <div class="page-item">
+                    <div>Page</div>
+                    <div class="page-label">06 Business</div>
+                </div>
+                <div class="page-item">
+                    <div>Page</div>
+                    <div class="page-label">07 Editorial</div>
+                </div>
+            </div>
+            <button class="carousel-nav" id="nextBtn">›</button>
+        </div>
+    </div>
+
+    <!-- Location Dropdown -->
+    <div class="location-popup" id="locationPopup">
+        <div class="location-item selected">Bengaluru City</div>
+        <div class="location-item">National Edition</div>
+        <div class="location-item">Kolar, Chikkaballapura</div>
+        <div class="location-item">Bagalkote, Haveri</div>
+        <div class="location-item">Belgavi, Uttar kannada</div>
+        <div class="location-item">Hubbali City</div>
+        <div class="location-item">Mangaluru</div>
+    </div>
+
+    <!-- Calendar Popup -->
+    <div class="calendar-popup" id="calendarPopup">
+        <div class="popup-title">Select Date</div>
+        <button class="close-btn" onclick="closeAllPopups()">&times;</button>
+        <div class="calendar-header">
+            <button>&lt;</button>
+            <span>July 2025</span>
+            <button>&gt;</button>
+        </div>
+        <div class="calendar-grid">
+            <div class="calendar-day">S</div>
+            <div class="calendar-day">M</div>
+            <div class="calendar-day">T</div>
+            <div class="calendar-day">W</div>
+            <div class="calendar-day">T</div>
+            <div class="calendar-day">F</div>
+            <div class="calendar-day">S</div>
+            <div class="calendar-day">29</div>
+            <div class="calendar-day">30</div>
+            <div class="calendar-day">1</div>
+            <div class="calendar-day">2</div>
+            <div class="calendar-day">3</div>
+            <div class="calendar-day today">4</div>
+            <div class="calendar-day">5</div>
+            <div class="calendar-day">6</div>
+            <div class="calendar-day">7</div>
+            <div class="calendar-day">8</div>
+            <div class="calendar-day">9</div>
+            <div class="calendar-day">10</div>
+            <div class="calendar-day">11</div>
+            <div class="calendar-day">12</div>
+        </div>
+    </div>
+
+    <script>
+        const pageBtn = document.getElementById('pageBtn');
+        const locationBtn = document.getElementById('locationBtn');
+        const calendarBtn = document.getElementById('calendarBtn');
+        const overlay = document.getElementById('overlay');
+        const pagePopup = document.getElementById('pagePopup');
+        const locationPopup = document.getElementById('locationPopup');
+        const calendarPopup = document.getElementById('calendarPopup');
+        const pageGrid = document.getElementById('pageGrid');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const bottomBar = document.querySelector('.bottom-bar');
+
+        // Carousel navigation
+        prevBtn.addEventListener('click', () => {
+            pageGrid.scrollBy({ left: -200, behavior: 'smooth' });
+        });
+
+        nextBtn.addEventListener('click', () => {
+            pageGrid.scrollBy({ left: 200, behavior: 'smooth' });
+        });
+
+        // Close menus when clicking on bottom bar (but not on active button)
+        bottomBar.addEventListener('click', (e) => {
+            // Only close if clicking on the bar itself or non-active buttons
+            if (e.target === bottomBar || 
+                (e.target.classList.contains('bottom-btn') && !e.target.classList.contains('active'))) {
+                closeAllPopups();
+            }
+        });
+
+        function closeAllPopups() {
+            overlay.classList.remove('active');
+            pagePopup.classList.remove('active');
+            locationPopup.classList.remove('active');
+            calendarPopup.classList.remove('active');
+            
+            // Remove active state from buttons
+            document.querySelectorAll('.bottom-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+
+        function showPagePopup() {
+            closeAllPopups();
+            setTimeout(() => {
+                overlay.classList.add('active');
+                pagePopup.classList.add('active');
+                pageBtn.classList.add('active');
+            }, 50);
+        }
+
+        function showLocationPopup() {
+            closeAllPopups();
+            setTimeout(() => {
+                overlay.classList.add('active');
+                locationPopup.classList.add('active');
+                locationBtn.classList.add('active');
+            }, 50);
+        }
+
+        function showCalendarPopup() {
+            closeAllPopups();
+            setTimeout(() => {
+                overlay.classList.add('active');
+                calendarPopup.classList.add('active');
+                calendarBtn.classList.add('active');
+            }, 50);
+        }
+
+        // Event listeners
+        pageBtn.addEventListener('click', showPagePopup);
+        locationBtn.addEventListener('click', showLocationPopup);
+        calendarBtn.addEventListener('click', showCalendarPopup);
+        overlay.addEventListener('click', closeAllPopups);
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAllPopups();
+            }
+        });
+
+        // Prevent popup clicks from closing
+        [pagePopup, locationPopup, calendarPopup].forEach(popup => {
+            popup.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+    </script>
+</body>
+</html>

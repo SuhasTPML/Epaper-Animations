@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bottom Sheet Animation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .plan-card {
+            border: 2px solid #ddd;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .plan-card:hover {
+            border-color: #007bff;
+        }
+
+        .select-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 16px 16px 0 0;
+            padding: 20px;
+            max-height: 70vh;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+
+        .bottom-sheet.show {
+            transform: translateY(0);
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            color: #666;
+        }
+
+        .plan-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .plan-subtitle {
+            color: #007bff;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .features {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .features li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .features li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .action-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .trigger-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Subscription Plans</h1>
+        
+        <button class="trigger-btn" onclick="toggleBottomSheet()">Toggle Bottom Sheet</button>
+        
+        <div class="plan-card">
+            <h3>Migrated Monthly Plan</h3>
+            <p>₹166/1 month</p>
+            <p>For curious minds</p>
+            <button class="select-btn" onclick="openBottomSheet('Monthly', '₹166/1 month', 'For curious minds')">
+                Select Plan
+            </button>
+        </div>
+
+        <div class="plan-card">
+            <h3>Yearly Plan</h3>
+            <p>₹1499/1 year</p>
+            <p>Stay ahead for a year</p>
+            <button class="select-btn" onclick="openBottomSheet('Yearly', '₹1499/1 year', 'Stay ahead for a year')">
+                Select Plan
+            </button>
+        </div>
+
+        <div class="plan-card">
+            <h3>2 Years Plan</h3>
+            <p>₹2999/2 years</p>
+            <p>Committed to Insight!</p>
+            <button class="select-btn" onclick="openBottomSheet('2 Years', '₹2999/2 years', 'Committed to Insight!')">
+                Select Plan
+            </button>
+        </div>
+
+        <!-- More content to show overlay effect -->
+        <div style="height: 300px; background: #f5f5f5; margin: 20px 0; padding: 20px;">
+            <p>Additional content...</p>
+            <p>This content will be dimmed when bottom sheet opens.</p>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeBottomSheet()"></div>
+
+    <!-- Bottom Sheet -->
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="sheet-header">
+            <div>
+                <h2 class="plan-title" id="sheetPlanTitle">Plan Title</h2>
+                <div class="plan-subtitle" id="sheetPlanSubtitle">Plan Subtitle</div>
+            </div>
+            <button class="close-btn" onclick="closeBottomSheet()">&times;</button>
+        </div>
+        
+        <div class="price" id="sheetPrice">₹166/1 month</div>
+        
+        <ul class="features">
+            <li>Stay informed with your daily e-paper, fresh at 6:30 AM.</li>
+            <li>Access one city edition of your choice.</li>
+            <li>No refund</li>
+        </ul>
+        
+        <button class="action-btn">Review & Pay</button>
+    </div>
+
+    <script>
+        function openBottomSheet(planName, price, subtitle) {
+            const overlay = document.getElementById('overlay');
+            const sheet = document.getElementById('bottomSheet');
+            const title = document.getElementById('sheetPlanTitle');
+            const subtitleEl = document.getElementById('sheetPlanSubtitle');
+            const priceEl = document.getElementById('sheetPrice');
+            
+            // Update content
+            title.textContent = planName + ' Plan';
+            subtitleEl.textContent = '- ' + subtitle;
+            priceEl.textContent = price;
+            
+            // Show sheet
+            overlay.classList.add('show');
+            sheet.classList.add('show');
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeBottomSheet() {
+            const overlay = document.getElementById('overlay');
+            const sheet = document.getElementById('bottomSheet');
+            
+            overlay.classList.remove('show');
+            sheet.classList.remove('show');
+            
+            // Restore body scroll
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleBottomSheet() {
+            const sheet = document.getElementById('bottomSheet');
+            if (sheet.classList.contains('show')) {
+                closeBottomSheet();
+            } else {
+                openBottomSheet('Monthly', '₹166/1 month', 'For curious minds');
+            }
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeBottomSheet();
+            }
+        });
+    </script>
+</body>
+</html>

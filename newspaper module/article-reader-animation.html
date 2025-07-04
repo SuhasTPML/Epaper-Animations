@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Reader Animation Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Main newspaper view */
+        .newspaper-view {
+            height: 100vh;
+            background: white;
+            padding: 20px 20px 80px 20px;
+            transition: transform 0.2s ease;
+            overflow-y: auto;
+        }
+
+        .newspaper-view.reading-mode {
+            transform: scale(0.95);
+            filter: brightness(0.8);
+        }
+
+        .newspaper-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .article-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .article-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .article-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            line-height: 1.3;
+        }
+
+        .article-meta {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .article-excerpt {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        /* Article reader overlay */
+        .article-reader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            transform: translateY(100%);
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .article-reader.active {
+            transform: translateY(0);
+        }
+
+        .article-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .back-btn {
+            background: #f8f9fa;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #495057;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #e9ecef;
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .article-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #6c757d;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .action-btn:active {
+            transform: scale(0.9);
+        }
+
+        .action-btn.close-btn {
+            color: #dc3545;
+        }
+
+        .action-btn.close-btn:hover {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px 100px 20px;
+        }
+
+        .article-headline {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            line-height: 1.2;
+        }
+
+        .article-byline {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .article-body {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+
+        .article-body p {
+            margin-bottom: 20px;
+        }
+
+        /* Bottom navigation for newspaper view */
+        .newspaper-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #2c3e50;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            transition: transform 0.2s ease;
+        }
+
+        .newspaper-bottom-nav.hidden {
+            transform: translateY(100%);
+        }
+
+        .nav-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+            min-width: 80px;
+        }
+
+        .nav-btn:hover {
+            background: #2980b9;
+        }
+
+        /* Article reader bottom actions */
+        .article-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1001;
+            transform: translateY(100%);
+            transition: transform 0.2s ease;
+        }
+
+        .article-bottom-nav.active {
+            transform: translateY(0);
+        }
+
+        .article-nav-btn {
+            background: none;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 24px;
+            color: #6c757d;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .article-nav-btn:hover {
+            background: #f8f9fa;
+            color: #495057;
+        }
+
+        .article-nav-btn span {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Overlay backdrop */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 500;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main newspaper view -->
+    <div class="newspaper-view" id="newspaperView">
+        <div class="newspaper-header">
+            <h1>📰 Deccan Herald</h1>
+            <p>Click any article to open article reader</p>
+            <p style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">Close with: Back button, ✕ button, click outside, or press Escape</p>
+            <p style="font-size: 12px; color: #95a5a6; margin-top: 3px;">Bottom nav switches between newspaper and article controls</p>
+        </div>
+
+        <div class="articles-grid">
+            <div class="article-card" onclick="openArticle('article1')">
+                <div class="article-title">Lokayukta admits its ex-SP involved in extortion racket</div>
+                <div class="article-meta">Bengaluru, DHNS • July 04, 2025</div>
+                <div class="article-excerpt">For the first time, the Karnataka Lokayukta has said that one of its former superintendents of police was involved in the extortion racket that was recently busted.</div>
+            </div>
+
+            <div class="article-card" onclick="openArticle('article2')">
+                <div class="article-title">India snubs China on Doklam Issue</div>
+                <div class="article-meta">New Delhi, PTI • July 04, 2025</div>
+                <div class="article-excerpt">India has firmly rejected China's latest claims regarding the Doklam region, stating that the area remains under dispute according to international agreements.</div>
+            </div>
+
+            <div class="article-card" onclick="openArticle('article3')">
+                <div class="article-title">Govt okays weapons purchase worth Rs 1.05 lakh cr</div>
+                <div class="article-meta">New Delhi, DHNS • July 04, 2025</div>
+                <div class="article-excerpt">The Defence Ministry on Thursday approved the purchase of 10 military equipment and weapons including three regiments of quick reaction surface-to-air missiles.</div>
+            </div>
+
+            <div class="article-card" onclick="openArticle('article4')">
+                <div class="article-title">Akash strikes after Gill's record double ton</div>
+                <div class="article-meta">Sports Desk • July 04, 2025</div>
+                <div class="article-excerpt">India pile up massive 587 in Edgbaston Test as Shubman Gill creates history with a record-breaking double century performance.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Newspaper Bottom Navigation -->
+    <div class="newspaper-bottom-nav" id="newspaperBottomNav">
+        <button class="nav-btn">Bengaluru City ⌄</button>
+        <button class="nav-btn">01 Front Page ⌄</button>
+        <button class="nav-btn">4 Jul 📅</button>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeArticle()"></div>
+
+    <!-- Article Reader -->
+    <div class="article-reader" id="articleReader">
+        <div class="article-header">
+            <button class="back-btn" onclick="closeArticle()">← Back</button>
+            <div class="article-actions">
+                <button class="action-btn">🔖</button>
+                <button class="action-btn">📤</button>
+                <button class="action-btn close-btn" onclick="closeArticle()">✕</button>
+            </div>
+        </div>
+
+        <div class="article-content" id="articleContent">
+            <!-- Article content will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Article Reader Bottom Navigation -->
+    <div class="article-bottom-nav" id="articleBottomNav">
+        <button class="article-nav-btn">
+            A-
+            <span>Text</span>
+        </button>
+        <button class="article-nav-btn">
+            A+
+            <span>Text</span>
+        </button>
+        <button class="article-nav-btn">
+            🗋
+            <span>Print</span>
+        </button>
+        <button class="article-nav-btn">
+            🔊
+            <span>Listen</span>
+        </button>
+        <button class="article-nav-btn">
+            📤
+            <span>Share</span>
+        </button>
+    </div>
+
+    <script>
+        const newspaperView = document.getElementById('newspaperView');
+        const overlay = document.getElementById('overlay');
+        const articleReader = document.getElementById('articleReader');
+        const articleContent = document.getElementById('articleContent');
+        const newspaperBottomNav = document.getElementById('newspaperBottomNav');
+        const articleBottomNav = document.getElementById('articleBottomNav');
+
+        const articles = {
+            article1: {
+                headline: "Lokayukta admits its ex-SP involved in extortion racket",
+                byline: "Bengaluru, DHNS • July 04, 2025",
+                content: `
+                    <p>For the first time, the Karnataka Lokayukta has said that one of its former superintendents of police was involved in the extortion racket that was recently busted.</p>
+                    
+                    <p>In a statement issued on Thursday, the Lokayukta said that Srinath Mahadev Joshi, who was on June 12 relieved as the SP, Bengaluru City-1, Karnataka Lokayukta, was in constant communication with the prime suspect, Ningappa G alias Ningappa Sawant. Ningappa, who was arrested by the Lokayukta police on June 2, was former constable from Hosadurga in Chitradurga and dismissed from service.</p>
+                    
+                    <p>The Lokayukta, quoting preliminary findings from the probe, alleged that Joshi and Ningappa conspired together and extorted money from government officials. The Lokayukta has since written to the Chief Secretary to take appropriate action against Joshi and give a report, as he, an IPS officer, was found to have violated the All India Services (Conduct) Rules, 1968.</p>
+                    
+                    <p>The Lokayukta said that there was no official complaint, but it took up a suo motu case after receiving information of the offences.</p>
+                `
+            },
+            article2: {
+                headline: "India snubs China on Doklam Issue",
+                byline: "New Delhi, PTI • July 04, 2025",
+                content: `
+                    <p>India has firmly rejected China's latest claims regarding the Doklam region, stating that the area remains under dispute according to international agreements.</p>
+                    
+                    <p>The Ministry of External Affairs issued a strong statement reiterating India's position on the border dispute and calling for peaceful resolution through established diplomatic channels.</p>
+                    
+                    <p>Sources indicate that the recent tensions arose following Chinese infrastructure development activities in the disputed area, which India considers a violation of existing agreements between the two nations.</p>
+                `
+            },
+            article3: {
+                headline: "Govt okays weapons purchase worth Rs 1.05 lakh cr",
+                byline: "New Delhi, DHNS • July 04, 2025",
+                content: `
+                    <p>The Defence Ministry on Thursday approved the purchase of 10 military equipment and weapons including three regiments of quick reaction surface-to-air missiles for the Indian Army and 12 mine countermeasure vessels (MCMVs) for the Indian Navy.</p>
+                    
+                    <p>All procurement to be made from Indian manufacturers as part of the government's push for self-reliance in defence manufacturing.</p>
+                    
+                    <p>The decision was taken during a meeting of the Defence Acquisition Council (DAC) chaired by Defence Minister Rajnath Singh, highlighting the government's commitment to modernizing the armed forces.</p>
+                `
+            },
+            article4: {
+                headline: "Akash strikes after Gill's record double ton",
+                byline: "Sports Desk • July 04, 2025",
+                content: `
+                    <p>India pile up massive 587 in Edgbaston Test as Shubman Gill creates history with a record-breaking double century performance.</p>
+                    
+                    <p>The young opener's magnificent knock of 217* put India in a commanding position against England on the second day of the Test match.</p>
+                    
+                    <p>Gill's innings included 28 boundaries and 3 sixes, showcasing his technical prowess and mental strength on the challenging English conditions.</p>
+                `
+            }
+        };
+
+        function openArticle(articleId) {
+            const article = articles[articleId];
+            if (!article) return;
+
+            // Populate article content
+            articleContent.innerHTML = `
+                <div class="article-headline">${article.headline}</div>
+                <div class="article-byline">${article.byline}</div>
+                <div class="article-body">${article.content}</div>
+            `;
+
+            // Hide newspaper bottom nav
+            newspaperBottomNav.classList.add('hidden');
+            
+            // Show overlay and scale down newspaper view
+            overlay.classList.add('active');
+            newspaperView.classList.add('reading-mode');
+            
+            // Slide up article reader
+            setTimeout(() => {
+                articleReader.classList.add('active');
+            }, 50);
+            
+            // Show article bottom nav after article appears
+            setTimeout(() => {
+                articleBottomNav.classList.add('active');
+            }, 250);
+        }
+
+        function closeArticle() {
+            // Hide article bottom nav first
+            articleBottomNav.classList.remove('active');
+            
+            // Hide article reader
+            articleReader.classList.remove('active');
+            
+            // After slide animation, hide overlay and restore newspaper view
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                newspaperView.classList.remove('reading-mode');
+                // Show newspaper bottom nav again
+                newspaperBottomNav.classList.remove('hidden');
+            }, 200);
+        }
+
+        // Prevent closing when clicking inside article content
+        articleReader.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && articleReader.classList.contains('active')) {
+                closeArticle();
+            }
+        });
+
+        // Add visual feedback for article cards
+        document.querySelectorAll('.article-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>
