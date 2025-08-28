@@ -2,6 +2,15 @@
 
 A minimal HTML reference demonstrating popup animations for a newspaper module interface.
 
+## 📁 Files
+
+- `article-reader-animation.html` - Article reader with slide-up animation
+- `bottom-nav-animations.html` - Bottom navigation popup menus
+- `faq-expand-collapse.html` - Interactive FAQ section with smooth animations
+- `README.md` - This documentation
+- `ARTICLE-READER-README.md` - Detailed article reader documentation
+- `FAQ-README.md` - Detailed FAQ component documentation
+
 ## Features
 
 ### Bottom Navigation
@@ -37,6 +46,13 @@ A minimal HTML reference demonstrating popup animations for a newspaper module i
 - Standard calendar grid layout
 - Current date highlighted
 
+### FAQ Expand/Collapse
+- **Smooth animations** for expanding and collapsing FAQ items
+- **Accordion behavior** (only one FAQ open at a time)
+- **Visual indicators** (plus/minus icons)
+- **Hover effects** on questions
+- **Color transitions** for active states
+
 ### Interaction
 
 **Opening Menus:**
@@ -54,11 +70,30 @@ A minimal HTML reference demonstrating popup animations for a newspaper module i
 - **Location**: Click any city to select
 - **Calendar**: Click any date to select
 
+**FAQ Section:**
+- Click any question to expand its answer
+- Click expanded question to collapse
+- Click different question to switch to that FAQ
+
 ### Visual Design
 - Semi-transparent dark overlay when menus are open
 - Rounded top corners on all popups
 - Smooth slide animations from bottom edge
 - Active button highlighting (red background)
+- Color transitions for FAQ items (blue highlight when active)
+
+## 🎯 Use Cases
+
+### Bottom Navigation
+- **Location Selection**: For multi-city newspaper editions
+- **Page Navigation**: For browsing different newspaper sections
+- **Date Selection**: For accessing archived editions
+
+### FAQ Section
+- **Customer Support**: Self-service help for common questions
+- **Subscription Information**: Details about plans and billing
+- **Technical Help**: Troubleshooting guides for app usage
+- **Editorial Information**: About the publication and staff
 
 ---
 

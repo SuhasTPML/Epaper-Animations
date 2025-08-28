@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Expand/Collapse Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .faq-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .faq-section {
+            margin-bottom: 60px;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #ddd;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px 60px 20px 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            font-weight: normal;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background: #f9f9f9;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 24px;
+            font-weight: bold;
+            color: #B8860B;
+            position: absolute;
+            right: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-question::after {
+            content: '−';
+            color: #B8860B;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            background: white;
+        }
+
+        .faq-answer-content {
+            padding: 0 60px 0 0;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            padding: 0 0 20px 0;
+        }
+
+        .facing-issues {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+        }
+
+        .facing-issues h3 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .facing-issues p {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .facing-issues a {
+            color: #4285f4;
+            text-decoration: underline;
+        }
+
+        .facing-issues a:hover {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="faq-title">Frequently Asked Questions</h1>
+        
+        <div class="faq-section">
+            <div class="faq-item">
+                <div class="faq-question">I forgot my password. How can I reset it?</div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Click on the "Forgot Password?" link on the login page. Enter your registered email ID and follow the instructions sent to your inbox to reset your password.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Can I log in using my mobile number?</div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Currently, login is supported only through your registered email address. Please use the email ID you provided during subscription to log in to your account.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How can I log in to my existing account?</div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Go to the login page and enter your registered email address and password. If you've forgotten your password, use the "Forgot Password?" option to reset it.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How will happen after a month for Monthly Subscription</div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Your monthly subscription will automatically renew after 30 days unless you cancel it before the renewal date. You'll be charged the same amount for the next month's access.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Is login required every time I visit the ePaper site?</div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>No, once you log in successfully, your session will be remembered for a certain period. However, for security reasons, you may need to log in again after extended periods of inactivity.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How do I log in to the Deccan Herald ePaper?</div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Visit the Deccan Herald ePaper website, click on the login button, and enter your subscription credentials (email and password). If you don't have an account, you'll need to subscribe first.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Where do you want this service? A welcome text message is an initial communication sent via SMS to new subscribers or customers. It introduces them to your brand and provides essential information to help them get started. Additionally, it can include a call-to-action to drive engagement, making it a valuable touchpoint in customer communication.</div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        <p>Our service is available nationwide. The welcome SMS helps new subscribers understand how to access and navigate the ePaper platform, ensuring a smooth onboarding experience.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="facing-issues">
+            <h3>Facing Issues?</h3>
+            <p>Contact Us at :<a href="mailto:support@epaper.deccanherald.com">support@epaper.deccanherald.com</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Get all FAQ items
+        const faqItems = document.querySelectorAll('.faq-item');
+        
+        // Add click event to each FAQ question
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            
+            question.addEventListener('click', () => {
+                // Close all other FAQ items
+                faqItems.forEach(otherItem => {
+                    if (otherItem !== item) {
+                        otherItem.classList.remove('active');
+                    }
+                });
+                
+                // Toggle current item
+                item.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>
